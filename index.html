@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert to Readable Spokable PDF</title>
+    <meta name="description" content="Convert PDFs to natural, spoken-friendly text using AI.">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo">
+            <h1>Readable Spokable PDF</h1>
+        </div>
+        <nav>
+            <button id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+            <button id="settings-btn">Settings</button>
+        </nav>
+    </header>
+
+    <main class="app-container">
+        <!-- Onboarding / Welcome Section -->
+        <section id="welcome-section" class="welcome-box">
+            <h2>Give your PDFs a Voice</h2>
+            <p>Convert technical documents, papers, and books into natural, spoken-friendly text optimized for TTS.</p>
+            <div class="quick-start">
+                <h3>Quick Start</h3>
+                <ol>
+                    <li>Get a <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio API Key</a>.</li>
+                    <li>Enter it in <strong>Settings</strong>.</li>
+                    <li>Upload a PDF and click Convert.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- File Input Section -->
+        <section id="upload-section" class="upload-area">
+            <div id="drop-zone" class="drop-zone">
+                <p>Drag & Drop PDF files here</p>
+                <p>or</p>
+                <input type="file" id="file-input" accept=".pdf" multiple hidden>
+                <button id="browse-btn" class="btn primary">Browse Files</button>
+            </div>
+            <div id="file-list" class="file-list"></div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progress-section" class="progress-area hidden">
+            <div class="progress-header">
+                <h3 id="progress-stage">Ready</h3>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div class="progress-controls">
+                <button id="pause-btn" class="btn secondary">Pause</button>
+                <button id="cancel-btn" class="btn danger">Cancel</button>
+                <button id="download-partial-btn" class="btn">Download Partial</button>
+            </div>
+            <div class="log-viewer">
+                <details>
+                    <summary>Live Logs</summary>
+                    <div id="log-content" class="log-content"></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="results-area hidden">
+            <h2>Conversion Complete</h2>
+            <div class="result-actions">
+                <button id="download-pdf-btn" class="btn primary">Download PDF</button>
+                <button id="tts-play-btn" class="btn">Listen Now</button>
+            </div>
+            <div id="tts-player" class="tts-player hidden">
+                <div class="tts-controls">
+                    <button id="tts-prev">⏮</button>
+                    <button id="tts-play-pause">▶</button>
+                    <button id="tts-next">⏭</button>
+                </div>
+                <div id="tts-status">Playing paragraph 1...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button id="close-settings" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <h3>API Configuration</h3>
+                    <label for="api-key">Google AI Studio API Key (Required)</label>
+                    <input type="password" id="api-key" placeholder="Paste your key here">
+                    <label for="backup-api-key">Backup API Key (Optional)</label>
+                    <input type="password" id="backup-api-key" placeholder="Backup key for failover">
+                </div>
+
+                <div class="settings-group">
+                    <h3>Model Selection</h3>
+                    <label for="model-select">Primary Model</label>
+                    <select id="model-select">
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Recommended)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    </select>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="turbo-mode" checked>
+                        <label for="turbo-mode">Turbo Mode (Parallel Processing)</label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Prompts</h3>
+                    <details>
+                        <summary>Edit Prompts</summary>
+                        <label for="system-prompt">System Prompt</label>
+                        <textarea id="system-prompt" rows="3"></textarea>
+                        <label for="transform-prompt">Transformation Prompt</label>
+                        <textarea id="transform-prompt" rows="3"></textarea>
+                    </details>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Data Management</h3>
+                    <button id="clear-data-btn" class="btn danger">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>&copy; 2025 Readable Spokable PDF. Data stays local.</p>
+        <nav>
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="about.html">About</a>
+        </nav>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

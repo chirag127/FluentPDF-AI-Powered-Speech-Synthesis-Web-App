@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert to Readable Spokable PDF</title>
+    <meta name="description" content="Convert PDFs to natural, spoken-friendly text using AI.">
+    <style>
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --bg-color: #f9fafb;
+    --card-bg: #ffffff;
+    --text-color: #111827;
+    --text-secondary: #6b7280;
+    --border-color: #e5e7eb;
+    --danger-color: #ef4444;
+    --success-color: #10b981;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+[data-theme="dark"] {
+    --primary-color: #6366f1;
+    --primary-hover: #818cf8;
+    --bg-color: #111827;
+    --card-bg: #1f2937;
+    --text-color: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border-color: #374151;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.5;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.app-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn.primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn.secondary {
+    background-color: transparent;
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn.danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.welcome-box {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(to right, var(--card-bg), var(--bg-color));
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.upload-area {
+    background-color: var(--card-bg);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    border: 2px dashed var(--border-color);
+    transition: border-color 0.2s;
+}
+
+.upload-area.drag-over {
+    border-color: var(--primary-color);
+    background-color: rgba(79, 70, 229, 0.05);
+}
+
+.drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.settings-group {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.settings-group input[type="text"],
+.settings-group input[type="password"],
+.settings-group select,
+.settings-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 0.5rem;
+    background-color: var(--border-color);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.log-viewer {
+    margin-top: 1rem;
+    font-family: monospace;
+    font-size: 0.8rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.app-footer {
+    text-align: center;
+    margin-top: 4rem;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.app-footer nav {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.app-footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    color: var(--primary-color);
+}
+
+</style>
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo">
+            <h1>Readable Spokable PDF</h1>
+        </div>
+        <nav>
+            <button id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+            <button id="settings-btn">Settings</button>
+        </nav>
+    </header>
+
+    <main class="app-container">
+        <!-- Onboarding / Welcome Section -->
+        <section id="welcome-section" class="welcome-box">
+            <h2>Give your PDFs a Voice</h2>
+            <p>Convert technical documents, papers, and books into natural, spoken-friendly text optimized for TTS.</p>
+            <div class="quick-start">
+                <h3>Quick Start</h3>
+                <ol>
+                    <li>Get a <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio API Key</a>.</li>
+                    <li>Enter it in <strong>Settings</strong>.</li>
+                    <li>Upload a PDF and click Convert.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- File Input Section -->
+        <section id="upload-section" class="upload-area">
+            <div id="drop-zone" class="drop-zone">
+                <p>Drag & Drop PDF files here</p>
+                <p>or</p>
+                <input type="file" id="file-input" accept=".pdf" multiple hidden>
+                <button id="browse-btn" class="btn primary">Browse Files</button>
+            </div>
+            <div id="file-list" class="file-list"></div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progress-section" class="progress-area hidden">
+            <div class="progress-header">
+                <h3 id="progress-stage">Ready</h3>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div class="progress-controls">
+                <button id="pause-btn" class="btn secondary">Pause</button>
+                <button id="cancel-btn" class="btn danger">Cancel</button>
+                <button id="download-partial-btn" class="btn">Download Partial</button>
+            </div>
+            <div class="log-viewer">
+                <details>
+                    <summary>Live Logs</summary>
+                    <div id="log-content" class="log-content"></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="results-area hidden">
+            <h2>Conversion Complete</h2>
+            <div class="result-actions">
+                <button id="download-pdf-btn" class="btn primary">Download PDF</button>
+                <button id="tts-play-btn" class="btn">Listen Now</button>
+            </div>
+            <div id="tts-player" class="tts-player hidden">
+                <div class="tts-controls">
+                    <button id="tts-prev">⏮</button>
+                    <button id="tts-play-pause">▶</button>
+                    <button id="tts-next">⏭</button>
+                </div>
+                <div id="tts-status">Playing paragraph 1...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button id="close-settings" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <h3>API Configuration</h3>
+                    <label for="api-key">Google AI Studio API Key (Required)</label>
+                    <input type="password" id="api-key" placeholder="Paste your key here">
+                    <label for="backup-api-key">Backup API Key (Optional)</label>
+                    <input type="password" id="backup-api-key" placeholder="Backup key for failover">
+                </div>
+
+                <div class="settings-group">
+                    <h3>Model Selection</h3>
+                    <label for="model-select">Primary Model</label>
+                    <select id="model-select">
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Recommended)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    </select>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="turbo-mode" checked>
+                        <label for="turbo-mode">Turbo Mode (Parallel Processing)</label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Prompts</h3>
+                    <details>
+                        <summary>Edit Prompts</summary>
+                        <label for="system-prompt">System Prompt</label>
+                        <textarea id="system-prompt" rows="3"></textarea>
+                        <label for="transform-prompt">Transformation Prompt</label>
+                        <textarea id="transform-prompt" rows="3"></textarea>
+                    </details>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Data Management</h3>
+                    <button id="clear-data-btn" class="btn danger">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>&copy; 2025 Readable Spokable PDF. Data stays local.</p>
+        <nav>
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="about.html">About</a>
+        </nav>
+    </footer>
+
+    <script>
+
+/* --- settings.js --- */
+const DEFAULT_SETTINGS = {
+    apiKey: '',
+    backupApiKey: '',
+    primaryModel: 'gemini-2.0-flash',
+    turboMode: true,
+    maxParallelChunks: 3,
+    systemPrompt: `You are an expert document accessibility assistant. Your goal is to convert technical PDF content into a natural, spoken-friendly format optimized for Text-to-Speech (TTS) engines and human listeners.
+
+Rules:
+1. **Code**: Do not read code character-by-character. Instead, describe the intent, logic, and behavior of the code block in plain English.
+2. **Tables**: Convert tables into narrative sentences. Explain the structure and the data trends or key values.
+3. **Figures/Images**: Provide descriptive alt-text style narratives explaining the visual content.
+4. **Math**: Convert mathematical notation into spoken form (e.g., "x squared" instead of "x^2").
+5. **Structure**: Maintain the logical flow of the document. Use clear transition words.
+6. **Citations**: Remove inline citations (e.g., [1], (Smith 2020)) to improve flow.
+7. **Tone**: Professional, clear, and engaging.`,
+    transformPrompt: `Convert the following text chunk into a spoken-friendly format following the system rules. Keep the same heading structure but rewrite the body text to be optimized for listening.`,
+    theme: 'light'
+};
+
+class SettingsManager {
+    constructor() {
+        this.settings = this.loadSettings();
+        this.applyTheme();
+    }
+
+    loadSettings() {
+        const stored = localStorage.getItem('rsp_settings');
+        return stored ? { ...DEFAULT_SETTINGS, ...JSON.parse(stored) } : { ...DEFAULT_SETTINGS };
+    }
+
+    saveSettings(newSettings) {
+        this.settings = { ...this.settings, ...newSettings };
+        localStorage.setItem('rsp_settings', JSON.stringify(this.settings));
+        this.applyTheme();
+        // Dispatch event for other components
+        window.dispatchEvent(new CustomEvent('settings-updated', { detail: this.settings }));
+    }
+
+    get(key) {
+        return this.settings[key];
+    }
+
+    applyTheme() {
+        document.documentElement.setAttribute('data-theme', this.settings.theme);
+    }
+
+    clearData() {
+        localStorage.removeItem('rsp_settings');
+        this.settings = { ...DEFAULT_SETTINGS };
+        this.applyTheme();
+        window.dispatchEvent(new CustomEvent('settings-cleared'));
+    }
+}
+
+const settingsManager = new SettingsManager();
+
+
+/* --- db.js --- */
+const DB_NAME = 'rsp_db';
+const DB_VERSION = 1;
+
+class DBManager {
+    constructor() {
+        this.dbPromise = this.initDB();
+    }
+
+    async initDB() {
+        return idb.openDB(DB_NAME, DB_VERSION, {
+            upgrade(db) {
+                // Store for raw PDF files
+                if (!db.objectStoreNames.contains('files')) {
+                    db.createObjectStore('files', { keyPath: 'id', autoIncrement: true });
+                }
+                // Store for processed chunks
+                if (!db.objectStoreNames.contains('chunks')) {
+                    const chunkStore = db.createObjectStore('chunks', { keyPath: 'id' });
+                    chunkStore.createIndex('fileId', 'fileId', { unique: false });
+                }
+                // Store for processing state/progress
+                if (!db.objectStoreNames.contains('state')) {
+                    db.createObjectStore('state', { keyPath: 'fileId' });
+                }
+            },
+        });
+    }
+
+    async saveFile(fileObj) {
+        const db = await this.dbPromise;
+        return db.put('files', fileObj);
+    }
+
+    async getFile(id) {
+        const db = await this.dbPromise;
+        return db.get('files', id);
+    }
+
+    async getAllFiles() {
+        const db = await this.dbPromise;
+        return db.getAll('files');
+    }
+
+    async saveChunk(chunk) {
+        const db = await this.dbPromise;
+        return db.put('chunks', chunk);
+    }
+
+    async getChunks(fileId) {
+        const db = await this.dbPromise;
+        return db.getAllFromIndex('chunks', 'fileId', fileId);
+    }
+
+    async saveState(fileId, state) {
+        const db = await this.dbPromise;
+        return db.put('state', { fileId, ...state });
+    }
+
+    async getState(fileId) {
+        const db = await this.dbPromise;
+        return db.get('state', fileId);
+    }
+
+    async clearAll() {
+        const db = await this.dbPromise;
+        await db.clear('files');
+        await db.clear('chunks');
+        await db.clear('state');
+    }
+}
+
+const dbManager = new DBManager();
+
+
+/* --- pdf-parser.js --- */
+class PDFParser {
+    constructor() {
+        // pdfjsLib is available globally via CDN
+    }
+
+    async extractText(arrayBuffer) {
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        const pdf = await loadingTask.promise;
+        const numPages = pdf.numPages;
+        let fullText = '';
+        const pages = [];
+
+        for (let i = 1; i <= numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+
+            // Simple heuristic for structure based on font height (optional improvement)
+            // For now, we'll just join items with spaces/newlines
+            let pageText = '';
+            let lastY = -1;
+
+            for (const item of textContent.items) {
+                // Check for new line based on Y position difference
+                if (lastY !== -1 && Math.abs(item.transform[5] - lastY) > 5) {
+                    pageText += '\n';
+                } else if (lastY !== -1) {
+                    pageText += ' '; // Add space between words on same line
+                }
+                pageText += item.str;
+                lastY = item.transform[5];
+            }
+
+            pages.push({
+                pageNumber: i,
+                text: pageText
+            });
+            fullText += pageText + '\n\n';
+        }
+
+        return {
+            pageCount: numPages,
+            text: fullText,
+            pages: pages
+        };
+    }
+}
+
+const pdfParser = new PDFParser();
+
+
+/* --- chunker.js --- */
+class Chunker {
+    constructor(options = {}) {
+        this.maxTokens = options.maxTokens || 4000;
+        this.overlapTokens = options.overlapTokens || 200;
+        this.charsPerToken = 4; // Rough estimate
+    }
+
+    chunkText(text) {
+        const maxChars = this.maxTokens * this.charsPerToken;
+        const overlapChars = this.overlapTokens * this.charsPerToken;
+
+        const chunks = [];
+        let startIndex = 0;
+
+        while (startIndex < text.length) {
+            let endIndex = startIndex + maxChars;
+
+            if (endIndex >= text.length) {
+                endIndex = text.length;
+            } else {
+                // Try to find a paragraph break (double newline) near the end
+                const lastDoubleNewline = text.lastIndexOf('\n\n', endIndex);
+                if (lastDoubleNewline > startIndex + (maxChars * 0.5)) {
+                    endIndex = lastDoubleNewline + 2; // Include the newlines
+                } else {
+                    // Try single newline
+                    const lastNewline = text.lastIndexOf('\n', endIndex);
+                    if (lastNewline > startIndex + (maxChars * 0.5)) {
+                        endIndex = lastNewline + 1;
+                    } else {
+                        // Fallback to space
+                        const lastSpace = text.lastIndexOf(' ', endIndex);
+                        if (lastSpace > startIndex + (maxChars * 0.5)) {
+                            endIndex = lastSpace + 1;
+                        }
+                    }
+                }
+            }
+
+            const chunkText = text.slice(startIndex, endIndex);
+            chunks.push({
+                index: chunks.length,
+                text: chunkText,
+                start: startIndex,
+                end: endIndex
+            });
+
+            if (endIndex === text.length) break;
+
+            // Move start index for next chunk, accounting for overlap
+            startIndex = endIndex - overlapChars;
+            // Ensure we don't get stuck if overlap is too big or no good break point
+            if (startIndex <= chunks[chunks.length - 1].start) {
+                startIndex = chunks[chunks.length - 1].end;
+            }
+        }
+
+        return chunks;
+    }
+}
+
+const chunker = new Chunker();
+
+
+/* --- api-client.js --- */
+class APIClient {
+    constructor() {
+        this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+    }
+
+    async generateContent(apiKey, model, prompt, systemInstruction = '') {
+        const url = `${this.baseUrl}/${model}:generateContent?key=${apiKey}`;
+
+        const contents = [
+            {
+                role: 'user',
+                parts: [{ text: prompt }]
+            }
+        ];
+
+        const body = {
+            contents: contents,
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 8192,
+            }
+        };
+
+        if (systemInstruction) {
+            body.systemInstruction = {
+                parts: [{ text: systemInstruction }]
+            };
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`API Error ${response.status}: ${errorData.error?.message || response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
+                return data.candidates[0].content.parts.map(p => p.text).join('');
+            } else {
+                throw new Error('No content generated');
+            }
+
+        } catch (error) {
+            console.error('Gemini API Call Failed:', error);
+            throw error;
+        }
+    }
+}
+
+const apiClient = new APIClient();
+
+
+/* --- queue.js --- */
+
+class ProcessingQueue {
+    constructor() {
+        this.queue = [];
+        this.activeCount = 0;
+        this.results = new Map();
+        this.isPaused = false;
+        this.onProgress = null;
+        this.onComplete = null;
+        this.onLog = null;
+    }
+
+    log(message, type = 'info') {
+        if (this.onLog) this.onLog({ message, type, timestamp: new Date() });
+        console.log(`[Queue] ${message}`);
+    }
+
+    async addChunks(fileId, chunks) {
+        this.queue = chunks.map(chunk => ({
+            ...chunk,
+            fileId,
+            status: 'pending',
+            attempts: 0,
+            currentKeyIndex: 0, // 0 = Primary, 1 = Backup
+            currentModelIndex: 0 // Index in available models list
+        }));
+        this.totalChunks = chunks.length;
+        this.processedChunks = 0;
+        this.log(`Added ${chunks.length} chunks to queue.`);
+    }
+
+    start() {
+        this.isPaused = false;
+        this.processQueue();
+    }
+
+    pause() {
+        this.isPaused = true;
+        this.log('Queue paused.');
+    }
+
+    resume() {
+        this.isPaused = false;
+        this.processQueue();
+    }
+
+    cancel() {
+        this.queue = [];
+        this.activeCount = 0;
+        this.isPaused = false;
+        this.log('Queue cancelled.');
+    }
+
+    async processQueue() {
+        if (this.isPaused) return;
+
+        const settings = settingsManager.settings;
+        const maxConcurrency = settings.turboMode ? (settings.maxParallelChunks || 3) : 1;
+
+        while (this.activeCount < maxConcurrency && this.queue.length > 0) {
+            const item = this.queue.shift();
+            this.activeCount++;
+            this.processItem(item).then(() => {
+                this.activeCount--;
+                this.processQueue();
+            });
+        }
+
+        if (this.activeCount === 0 && this.queue.length === 0) {
+            if (this.onComplete) this.onComplete(Array.from(this.results.values()));
+        }
+    }
+
+    async processItem(item) {
+        if (this.isPaused) {
+            this.queue.unshift(item); // Put back
+            return;
+        }
+
+        const settings = settingsManager.settings;
+
+        // Determine Key and Model
+        let apiKey = item.currentKeyIndex === 0 ? settings.apiKey : settings.backupApiKey;
+        if (!apiKey && item.currentKeyIndex === 1) {
+            // No backup key, revert to primary or fail?
+            // If we switched to backup but it's empty, try next model with primary key
+            item.currentKeyIndex = 0;
+            item.currentModelIndex++;
+            apiKey = settings.apiKey;
+        }
+
+        // Fallback models list (simplified for now, could be in settings)
+        const models = [settings.primaryModel, 'gemini-1.5-pro', 'gemini-1.5-flash'];
+        let model = models[item.currentModelIndex] || models[0];
+
+        if (item.currentModelIndex >= models.length) {
+            this.log(`Failed to process chunk ${item.index} after trying all models.`, 'error');
+            item.status = 'failed';
+            this.results.set(item.index, { ...item, error: 'All models failed' });
+            this.processedChunks++;
+            this.updateProgress();
+            return;
+        }
+
+        this.log(`Processing Chunk ${item.index + 1}/${this.totalChunks} with ${model}...`);
+
+        try {
+            const prompt = `${settings.transformPrompt}\n\nText:\n${item.text}`;
+            const resultText = await apiClient.generateContent(apiKey, model, prompt, settings.systemPrompt);
+
+            item.status = 'completed';
+            item.result = resultText;
+            this.results.set(item.index, item);
+
+            // Save to DB
+            await dbManager.saveChunk(item);
+
+            this.processedChunks++;
+            this.updateProgress();
+
+        } catch (error) {
+            this.log(`Error processing chunk ${item.index}: ${error.message}`, 'warning');
+
+            // Retry Logic
+            if (error.message.includes('429') || error.message.includes('503')) {
+                // Rate limit or Server Error -> Wait and Retry
+                await new Promise(resolve => setTimeout(resolve, 2000 * (item.attempts + 1)));
+                item.attempts++;
+                if (item.attempts > 3) {
+                    // Switch Key or Model
+                    this.handleFailover(item);
+                } else {
+                    this.queue.push(item); // Re-queue
+                }
+            } else {
+                // Other error -> Failover immediately
+                this.handleFailover(item);
+            }
+        }
+    }
+
+    handleFailover(item) {
+        const settings = settingsManager.settings;
+
+        if (item.currentKeyIndex === 0 && settings.backupApiKey) {
+            this.log(`Switching to Backup API Key for chunk ${item.index}`);
+            item.currentKeyIndex = 1;
+            item.attempts = 0;
+        } else {
+            this.log(`Switching to next model for chunk ${item.index}`);
+            item.currentKeyIndex = 0; // Reset to primary key for new model
+            item.currentModelIndex++;
+            item.attempts = 0;
+        }
+        this.queue.push(item);
+    }
+
+    updateProgress() {
+        if (this.onProgress) {
+            const percent = Math.round((this.processedChunks / this.totalChunks) * 100);
+            this.onProgress(percent, this.processedChunks, this.totalChunks);
+        }
+    }
+}
+
+const processingQueue = new ProcessingQueue();
+
+
+/* --- pdf-generator.js --- */
+class PDFGenerator {
+    constructor() {
+        // jsPDF is available globally
+    }
+
+    async generatePDF(chunks, filename = 'output.pdf') {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const maxLineWidth = pageWidth - (margin * 2);
+
+        let y = margin;
+
+        // Title Page
+        doc.setFontSize(24);
+        doc.text('Readable Spokable PDF', pageWidth / 2, y + 20, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, y + 35, { align: 'center' });
+
+        doc.addPage();
+        y = margin;
+
+        // Content
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        doc.setLineHeightFactor(1.5);
+
+        // Sort chunks by index just in case
+        chunks.sort((a, b) => a.index - b.index);
+
+        for (const chunk of chunks) {
+            const text = chunk.result || '';
+            const lines = doc.splitTextToSize(text, maxLineWidth);
+
+            for (const line of lines) {
+                if (y > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin;
+                }
+                doc.text(line, margin, y);
+                y += 7; // Line height approx
+            }
+
+            // Add some spacing between chunks
+            y += 10;
+        }
+
+        doc.save(filename);
+    }
+}
+
+const pdfGenerator = new PDFGenerator();
+
+
+/* --- tts.js --- */
+class TTSPlayer {
+    constructor() {
+        this.synth = window.speechSynthesis;
+        this.utterance = null;
+        this.isPlaying = false;
+        this.chunks = [];
+        this.currentChunkIndex = 0;
+        this.onStatusChange = null;
+    }
+
+    loadText(chunks) {
+        this.chunks = chunks.sort((a, b) => a.index - b.index);
+        this.currentChunkIndex = 0;
+    }
+
+    play() {
+        if (this.synth.paused) {
+            this.synth.resume();
+            this.isPlaying = true;
+            this.updateStatus();
+            return;
+        }
+
+        if (this.synth.speaking) {
+            return; // Already playing
+        }
+
+        this.speakChunk();
+    }
+
+    speakChunk() {
+        if (this.currentChunkIndex >= this.chunks.length) {
+            this.isPlaying = false;
+            this.updateStatus('Finished');
+            return;
+        }
+
+        const text = this.chunks[this.currentChunkIndex].result;
+        this.utterance = new SpeechSynthesisUtterance(text);
+
+        this.utterance.onend = () => {
+            this.currentChunkIndex++;
+            this.speakChunk();
+        };
+
+        this.utterance.onerror = (e) => {
+            console.error('TTS Error:', e);
+            this.isPlaying = false;
+            this.updateStatus('Error');
+        };
+
+        this.synth.speak(this.utterance);
+        this.isPlaying = true;
+        this.updateStatus();
+    }
+
+    pause() {
+        this.synth.pause();
+        this.isPlaying = false;
+        this.updateStatus();
+    }
+
+    next() {
+        this.synth.cancel();
+        this.currentChunkIndex++;
+        if (this.currentChunkIndex >= this.chunks.length) this.currentChunkIndex = 0; // Loop or stop? Stop preferred usually.
+        this.speakChunk();
+    }
+
+    prev() {
+        this.synth.cancel();
+        this.currentChunkIndex--;
+        if (this.currentChunkIndex < 0) this.currentChunkIndex = 0;
+        this.speakChunk();
+    }
+
+    updateStatus(msg) {
+        if (this.onStatusChange) {
+            const status = msg || (this.isPlaying ? `Playing chunk ${this.currentChunkIndex + 1}/${this.chunks.length}` : 'Paused');
+            this.onStatusChange(status, this.isPlaying);
+        }
+    }
+}
+
+const ttsPlayer = new TTSPlayer();
+
+
+/* --- main.js --- */
+
+class App {
+    constructor() {
+        this.initUI();
+        this.bindEvents();
+        this.currentFileId = null;
+        this.processedChunks = [];
+    }
+
+    initUI() {
+        // Theme
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const current = settingsManager.get('theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            settingsManager.saveSettings({ theme: next });
+        });
+
+        // Settings Modal
+        const modal = document.getElementById('settings-modal');
+        document.getElementById('settings-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+        document.getElementById('close-settings').addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Load Settings into UI
+        this.loadSettingsToUI();
+    }
+
+    loadSettingsToUI() {
+        const s = settingsManager.settings;
+        document.getElementById('api-key').value = s.apiKey || '';
+        document.getElementById('backup-api-key').value = s.backupApiKey || '';
+        document.getElementById('model-select').value = s.primaryModel;
+        document.getElementById('turbo-mode').checked = s.turboMode;
+        document.getElementById('system-prompt').value = s.systemPrompt;
+        document.getElementById('transform-prompt').value = s.transformPrompt;
+    }
+
+    saveSettingsFromUI() {
+        settingsManager.saveSettings({
+            apiKey: document.getElementById('api-key').value,
+            backupApiKey: document.getElementById('backup-api-key').value,
+            primaryModel: document.getElementById('model-select').value,
+            turboMode: document.getElementById('turbo-mode').checked,
+            systemPrompt: document.getElementById('system-prompt').value,
+            transformPrompt: document.getElementById('transform-prompt').value,
+        });
+    }
+
+    bindEvents() {
+        // Save settings on change
+        ['api-key', 'backup-api-key', 'model-select', 'turbo-mode', 'system-prompt', 'transform-prompt']
+            .forEach(id => {
+                document.getElementById(id).addEventListener('change', () => this.saveSettingsFromUI());
+            });
+
+        document.getElementById('clear-data-btn').addEventListener('click', async () => {
+            if (confirm('Are you sure? This will delete all saved files and settings.')) {
+                await dbManager.clearAll();
+                settingsManager.clearData();
+                location.reload();
+            }
+        });
+
+        // File Input
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        document.getElementById('browse-btn').addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            this.handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
+
+        // Controls
+        document.getElementById('pause-btn').addEventListener('click', () => processingQueue.pause());
+        document.getElementById('cancel-btn').addEventListener('click', () => processingQueue.cancel());
+        document.getElementById('download-partial-btn').addEventListener('click', () => this.downloadResult());
+        document.getElementById('download-pdf-btn').addEventListener('click', () => this.downloadResult());
+
+        // TTS
+        document.getElementById('tts-play-btn').addEventListener('click', () => {
+            document.getElementById('tts-player').classList.remove('hidden');
+            ttsPlayer.loadText(this.processedChunks);
+            ttsPlayer.play();
+        });
+        document.getElementById('tts-play-pause').addEventListener('click', () => ttsPlayer.play()); // Toggle logic in player
+        document.getElementById('tts-next').addEventListener('click', () => ttsPlayer.next());
+        document.getElementById('tts-prev').addEventListener('click', () => ttsPlayer.prev());
+
+        // Queue Callbacks
+        processingQueue.onLog = (log) => this.addLog(log.message, log.type);
+        processingQueue.onProgress = (percent, current, total) => this.updateProgress(percent, current, total);
+        processingQueue.onComplete = (results) => this.handleComplete(results);
+
+        ttsPlayer.onStatusChange = (status, isPlaying) => {
+            document.getElementById('tts-status').textContent = status;
+            document.getElementById('tts-play-pause').textContent = isPlaying ? '⏸' : '▶';
+        };
+    }
+
+    async handleFiles(files) {
+        if (files.length === 0) return;
+
+        const file = files[0]; // Single file for now
+        this.addLog(`Selected file: ${file.name}`);
+
+        // Check API Key
+        if (!settingsManager.get('apiKey')) {
+            alert('Please enter your Google AI Studio API Key in Settings first.');
+            document.getElementById('settings-modal').classList.remove('hidden');
+            return;
+        }
+
+        try {
+            // UI Update
+            document.getElementById('upload-section').classList.add('hidden');
+            document.getElementById('progress-section').classList.remove('hidden');
+            this.updateStage('Reading PDF...');
+
+            // Read File
+            const arrayBuffer = await file.arrayBuffer();
+
+            // Save to DB
+            const fileId = Date.now(); // Simple ID
+            this.currentFileId = fileId;
+            await dbManager.saveFile({ id: fileId, name: file.name, data: arrayBuffer });
+
+            // Extract Text
+            this.updateStage('Extracting Text...');
+            const { text, pageCount } = await pdfParser.extractText(arrayBuffer);
+            this.addLog(`Extracted text from ${pageCount} pages.`);
+
+            // Chunking
+            this.updateStage('Chunking Text...');
+            const chunks = chunker.chunkText(text);
+            this.addLog(`Created ${chunks.length} chunks.`);
+
+            // Start Processing
+            this.updateStage('Processing with Gemini...');
+            processingQueue.addChunks(fileId, chunks);
+            processingQueue.start();
+
+        } catch (error) {
+            this.addLog(`Error: ${error.message}`, 'error');
+            alert('Error processing file: ' + error.message);
+        }
+    }
+
+    updateStage(stage) {
+        document.getElementById('progress-stage').textContent = stage;
+    }
+
+    updateProgress(percent, current, total) {
+        document.getElementById('progress-percent').textContent = `${percent}%`;
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+        this.updateStage(`Processing chunk ${current}/${total}`);
+    }
+
+    addLog(message, type = 'info') {
+        const logDiv = document.getElementById('log-content');
+        const entry = document.createElement('div');
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        entry.style.color = type === 'error' ? 'var(--danger-color)' : type === 'warning' ? 'orange' : 'inherit';
+        logDiv.prepend(entry);
+    }
+
+    handleComplete(results) {
+        this.processedChunks = results;
+        this.updateStage('Complete!');
+        this.addLog('Processing complete.');
+        document.getElementById('progress-section').classList.add('hidden');
+        document.getElementById('results-section').classList.remove('hidden');
+    }
+
+    downloadResult() {
+        if (!this.processedChunks || this.processedChunks.length === 0) {
+            // Try to get partial results from queue
+            this.processedChunks = Array.from(processingQueue.results.values());
+        }
+
+        if (this.processedChunks.length === 0) {
+            alert('No processed content available yet.');
+            return;
+        }
+
+        pdfGenerator.generatePDF(this.processedChunks, 'readable_spokable_output.pdf');
+    }
+}
+
+// Initialize
+window.app = new App();
+
+
+</script>
+</body>
+</html>
