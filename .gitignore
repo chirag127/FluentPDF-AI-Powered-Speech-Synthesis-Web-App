@@ -1,0 +1,59 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.pid.lock
+
+# Build artifacts
+node_modules/
+dist/
+.output/
+.vite/
+.next/
+out/
+
+# IDE/Editor specific
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OSX Files
+.DS_Store
+
+# Windows thumbnail cache files
+Thumbs.db
+
+# Project specific files
+.env
+.env.*
+!src/config/.env.example
+
+# Testing Frameworks
+# Uncomment if using Jest or Vitest for coverage reports
+# coverage/
+
+# Deployment artifacts
+# If you have a specific deployment build folder
+# deploy/
+
+# CI/CD artifacts (if any are generated locally before upload)
+# .github/
+
+# VS Code settings
+.vscode/
+
+# Misc
+*.bak
+*.swp
+*.swo
