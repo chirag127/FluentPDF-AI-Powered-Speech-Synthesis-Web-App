@@ -1,0 +1,60 @@
+# Configuration for repository badges displayed in the README.md
+# Style: flat-square is mandatory for all badges.
+
+badges:
+  - name: "Build Status"
+    img_url: "https://github.com/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App/actions/workflows/ci.yml/badge.svg?style=flat-square"
+    link_url: "https://github.com/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App/actions/workflows/ci.yml"
+    markdown: "[
+![Build Status](https://github.com/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App/actions/workflows/ci.yml/badge.svg?style=flat-square)
+](https://github.com/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App/actions/workflows/ci.yml)"
+
+  - name: "Code Coverage"
+    img_url: "https://img.shields.io/codecov/c/github/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App?style=flat-square&token=YOUR_CODECOV_TOKEN"
+    link_url: "https://codecov.io/gh/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App"
+    markdown: "[
+![Code Coverage](https://img.shields.io/codecov/c/github/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App?style=flat-square&token=YOUR_CODECOV_TOKEN)
+](https://codecov.io/gh/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App)"
+
+  - name: "Lint & Format"
+    img_url: "https://img.shields.io/badge/lint_&_format-Biome-000000?style=flat-square&logo=biome&logoColor=white"
+    link_url: "https://biomejs.dev/"
+    markdown: "
+![Biome](https://img.shields.io/badge/lint_&_format-Biome-000000?style=flat-square&logo=biome&logoColor=white)
+"
+
+  - name: "License"
+    img_url: "https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg?style=flat-square"
+    link_url: "https://github.com/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App/blob/main/LICENSE"
+    markdown: "[
+![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg?style=flat-square)
+](https://github.com/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App/blob/main/LICENSE)"
+
+  - name: "GitHub Stars"
+    img_url: "https://img.shields.io/github/stars/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App?style=flat-square&logo=github&label=Stars"
+    link_url: "https://github.com/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App/stargazers"
+    markdown: "[
+![GitHub Stars](https://img.shields.io/github/stars/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App?style=flat-square&logo=github&label=Stars)
+](https://github.com/chirag127/FluentPDF-AI-Powered-Speech-Synthesis-Web-App/stargazers)"
+
+tech_stack:
+  - name: "HTML5"
+    img_url: "https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white"
+    link_url: "https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5"
+    markdown: "
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+"
+
+  - name: "CSS3"
+    img_url: "https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white"
+    link_url: "https://developer.mozilla.org/en-US/docs/Web/CSS"
+    markdown: "
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
+"
+
+  - name: "JavaScript"
+    img_url: "https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black"
+    link_url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+    markdown: "
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+"
